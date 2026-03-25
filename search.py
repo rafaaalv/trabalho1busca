@@ -73,7 +73,6 @@ def tinyMazeSearch(problem):
     s = Directions.SOUTH
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
-
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -89,34 +88,64 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    print(problem.getSuccessors(problem.getStartState()))
-    actions = []
+    #inicializa as acoes no estado inicial como.uma lista vazia
+    actions = {
+    	problem.getStartState(): []
+    }
+    #dicionario de coordenadas para facilitar a transformacao da string com a coordenada para o passo
+    coo = {
+    	"North":  n,
+    	"South": s,
+    	"East": e,
+    	"West": w
+    }
+    #inicializa resultado como uma lista vazia
+    result = []
+    #confere se o estado inicial eh o objetivo
+    if problem.isGoalState(problem.getStartState()):
+    	return result
+    #inicializa pilha e lista de visitados vazias
     stack = deque()
     visited = []
+    #coloca o estado inicial como visitado
     visited.append(problem.getStartState())
-    predecessor = problem.getStartState()
+    #inicializa o dicionario de pais com o estado inicial sem pai
     parent = {
-        problem.getStartState(): -1
+        problem.getStartState(): (-1, -1)
     }
-    actions.append([])
-    father = 0
+    #itera sobre os sucessores do estado inicial
     for successor in problem.getSuccessors(problem.getStartState()):
+        #coloca o sucessor na pilha
         stack.append(successor)
-        parent[successor[0]] = father
+        #atribui o pai do sucessor como o estado inicial
+        parent[successor[0]] = problem.getStartState()
+    #enquanto a pilha nao estiver vazia
     while stack:
+        #tira o primeiro elemento da pilha
         state = stack.pop()
-        iparent = parent[state[0]]
+        #descobre o pai do estado(quem colocou ele na pilha)
+        father = parent[state[0]]
+        #se o estado atual for o objetivo
         if problem.isGoalState(state[0]):
-            result = actions[iparent] + state[1]
+            #resultado eh igual aos passos para chegar ao pai + a acao necessaria para chegar no estado atual
+            result = actions[father]
+            result.append(coo[state[1]])
             break
         else:
-            actions.append(actions[iparent] + state[1])
-            father += 1
+            #se nao for o estado objetivo adiciona na lista de acoes, as acoes necessarias para chegar no estado atual
+            actions[state[0]] = actions[father]
+            actions[state[0]].append(coo[state[1]])
+            #marca o estsdo atual como visitado
             visited.append(state[0])
+            #iters por seus sucessores
             for successor in problem.getSuccessors(state[0]):
+                #se o sucessor nao tiver sido visitado
                 if not successor[0] in visited:
+                    #adicona o sucessor na pilha
                     stack.append(successor)
-                    parent[successor[0]] = father
+                    #atribui o pai do sucessor como o estado atual
+                    parent[successor[0]] = state[0]
+    #caso nao encontre o estado objetivo retorna a lista vazia
     return result
     util.raiseNotDefined()
 
