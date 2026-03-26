@@ -19,7 +19,7 @@ Pacman agents (in searchAgents.py).
 
 import util
 from collections import deque
-
+from game import Directions
 
 class SearchProblem:
     """
@@ -93,6 +93,10 @@ def depthFirstSearch(problem):
     	problem.getStartState(): []
     }
     #dicionario de coordenadas para facilitar a transformacao da string com a coordenada para o passo
+    s = Directions.SOUTH
+    w = Directions.WEST
+    n = Directions.NORTH
+    e = Directions.EAST
     coo = {
     	"North":  n,
     	"South": s,
@@ -128,12 +132,12 @@ def depthFirstSearch(problem):
         #se o estado atual for o objetivo
         if problem.isGoalState(state[0]):
             #resultado eh igual aos passos para chegar ao pai + a acao necessaria para chegar no estado atual
-            result = actions[father]
+            result = actions[father].copy()
             result.append(coo[state[1]])
             break
         else:
             #se nao for o estado objetivo adiciona na lista de acoes, as acoes necessarias para chegar no estado atual
-            actions[state[0]] = actions[father]
+            actions[state[0]] = actions[father].copy()
             actions[state[0]].append(coo[state[1]])
             #marca o estsdo atual como visitado
             visited.append(state[0])
@@ -150,10 +154,85 @@ def depthFirstSearch(problem):
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
-    """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    """
+    Search the deepest nodes in the search tree first.
 
+    Your search algorithm needs to return a list of actions that reaches the
+    goal. Make sure to implement a graph search algorithm.
+
+    To get started, you might want to try some of these simple commands to
+    understand the search problem that is being passed in:
+
+    print("Start:", problem.getStartState())
+    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
+    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
+    """
+    "*** YOUR CODE HERE ***"
+    #inicializa as acoes no estado inicial como.uma lista vazia
+    actions = {
+    	problem.getStartState(): []
+    }
+    #dicionario de coordenadas para facilitar a transformacao da string com a coordenada para o passo
+    s = Directions.SOUTH
+    w = Directions.WEST
+    n = Directions.NORTH
+    e = Directions.EAST
+    coo = {
+    	"North":  n,
+    	"South": s,
+    	"East": e,
+    	"West": w
+    }
+    #inicializa resultado como uma lista vazia
+    result = []
+    #confere se o estado inicial eh o objetivo
+    if problem.isGoalState(problem.getStartState()):
+    	return result
+    #inicializa fila e lista de visitados vazias
+    queue = deque()
+    visited = []
+    #coloca o estado inicial como visitado
+    visited.append(problem.getStartState())
+    #inicializa o dicionario de pais com o estado inicial sem pai
+    parent = {
+        problem.getStartState(): (-1, -1)
+    }
+    #itera sobre os sucessores do estado inicial
+    for successor in problem.getSuccessors(problem.getStartState()):
+        #coloca o sucessor na fila
+        queue.append(successor)
+        #atribui o pai do sucessor como o estado inicial
+        parent[successor[0]] = problem.getStartState()
+    #enquanto a fila nao estiver vazia
+    while queue:
+        #tira o ultimo elemento da fila
+        state = queue.popleft()
+        #descobre o pai do estado(quem colocou ele na fila)
+        father = parent[state[0]]
+        #se o estado atual for o objetivo
+        if problem.isGoalState(state[0]):
+            #resultado eh igual aos passos para chegar ao pai + a acao necessaria para chegar no estado atual
+            result = actions[father].copy()
+            result.append(coo[state[1]])
+            break
+        else:
+            #se nao for o estado objetivo adiciona na lista de acoes, as acoes necessarias para chegar no estado atual
+            actions[state[0]] = actions[father].copy()
+            actions[state[0]].append(coo[state[1]])
+            #marca o estsdo atual como visitado
+            visited.append(state[0])
+            #iters por seus sucessores
+            for successor in problem.getSuccessors(state[0]):
+                #se o sucessor nao tiver sido visitado
+                if not successor[0] in visited:
+                    #adicona o sucessor na fila
+                    queue.append(successor)
+                    #atribui o pai do sucessor como o estado atual
+                    parent[successor[0]] = state[0]
+    #caso nao encontre o estado objetivo retorna a lista vazia
+    return result
+    util.raiseNotDefined()
+    
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
