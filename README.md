@@ -6,7 +6,6 @@
 <h1><center>Trabalho 1 - Pacman</center></h1>
 </p>
 
-## Teste
 ## Introdução
 
 Neste projeto, seu agente Pacman deve encontrar caminhos através de dos labirintos,  de modo a cumprir algumas tarefas, como chegar em algum local específico ou coletar comida de forma eficiente. Sua tarefa sera desenvolver algoritmos de busca e aplicá-los nos diversos cenários do Pacman.
