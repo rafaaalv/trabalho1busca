@@ -89,70 +89,40 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    #inicializa as acoes no estado inicial como.uma lista vazia
-    actions = {
-    	problem.getStartState(): []
-    }
-    #dicionario de coordenadas para facilitar a transformacao da string com a coordenada para o passo
-    s = Directions.SOUTH
-    w = Directions.WEST
-    n = Directions.NORTH
-    e = Directions.EAST
-    coo = {
-    	"North":  n,
-    	"South": s,
-    	"East": e,
-    	"West": w
-    }
-    #inicializa resultado como uma lista vazia
-    result = []
-    #confere se o estado inicial eh o objetivo
-    if problem.isGoalState(problem.getStartState()):
-    	return result
-    #inicializa pilha e lista de visitados vazias
-    stack = deque()
-    visited = []
-    #coloca o estado inicial como visitado
-    visited.append(problem.getStartState())
-    #inicializa o dicionario de pais com o estado inicial sem pai
-    parent = {
-        problem.getStartState(): (-1, -1)
-    }
-    #itera sobre os sucessores do estado inicial
-    for successor in problem.getSuccessors(problem.getStartState()):
-        #coloca o sucessor na pilha
-        stack.append(successor)
-        #atribui o pai do sucessor como o estado inicial
-        parent[successor[0]] = problem.getStartState()
-    #enquanto a pilha nao estiver vazia
-    while stack:
-        #tira o primeiro elemento da pilha
-        state = stack.pop()
-        #descobre o pai do estado(quem colocou ele na pilha)
-        father = parent[state[0]]
-        #se o estado atual for o objetivo
-        if problem.isGoalState(state[0]):
-            #resultado eh igual aos passos para chegar ao pai + a acao necessaria para chegar no estado atual
-            result = actions[father].copy()
-            result.append(coo[state[1]])
-            break
-        else:
-            #se nao for o estado objetivo adiciona na lista de acoes, as acoes necessarias para chegar no estado atual
-            actions[state[0]] = actions[father].copy()
-            actions[state[0]].append(coo[state[1]])
-            #marca o estsdo atual como visitado
-            visited.append(state[0])
-            #itera por seus sucessores
-            for successor in problem.getSuccessors(state[0]):
-                #se o sucessor nao tiver sido visitado
-                if not successor[0] in visited:
-                    #adicona o sucessor na pilha
-                    stack.append(successor)
-                    #atribui o pai do sucessor como o estado atual
-                    parent[successor[0]] = state[0]
-    #caso nao encontre o estado objetivo retorna a lista vazia
-    return result
+
+    #importa classe pilha do arquivo util.py
+    from util import Stack
+
+    #carrega o estado inicial
+    start = problem.getStartState()
+    #inicia a pilha
+    pilha = Stack()
+    #inicia a lista de visitados
+    visitados = []
+    #coloca na pilha o estado inicial, o caminho vazio e o custo vazio
+    pilha.push((start, [], 0))
+
+    #enquanto a pilha nao está vazia
+    while not pilha.isEmpty():
+        #tira o estado, caminho e custo de cima da pilha
+        atual, path, custoAtual = pilha.pop()
+        #adiciona o estado atual na lista de visitados
+        visitados.append(atual)
+        #se é o estado final, retorna o caminho e sai da função
+        if problem.isGoalState(atual):
+            return path
+        #para todos os sucessores do estado atual, 
+        for estado, ação, custo in problem.getSuccessors(atual):
+            #se o estado do sucessor não está na lista de visitados
+            if estado not in visitados:
+                # coloca ele na pilha e introduz a ação para chegar nele no caminho
+                pilha.push((estado, path + [ação], custo))
+    return[]
     util.raiseNotDefined()
+
+
+    
+    
 
 def breadthFirstSearch(problem):
     """
@@ -235,10 +205,39 @@ def breadthFirstSearch(problem):
     util.raiseNotDefined()
     
 def uniformCostSearch(problem):
-    """Search the node of least total cost first."""
+    """
+    Search the node of least total cost first.
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
+    """
 
+    from util import PriorityQueue
+    pq = PriorityQueue()
+    
+    start = problem.getStartState()
+    
+    # item = (estado, caminho, custo)
+    pq.push((start, [], 0), 0)
+    
+    cost_so_far = {}
+
+    while not pq.isEmpty():
+        state, path, cost = pq.pop()
+
+        # evita expandir caminhos piores
+        if state in cost_so_far and cost > cost_so_far[state]:
+            continue
+
+        cost_so_far[state] = cost
+
+        if problem.isGoalState(state):
+            return path
+
+        for successor, action, stepCost in problem.getSuccessors(state):
+            new_cost = cost + stepCost
+            pq.push((successor, path + [action], new_cost), new_cost)
+
+    return []
 def nullHeuristic(state, problem=None):
     """
     A heuristic function estimates the cost from the current state to the nearest
