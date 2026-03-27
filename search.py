@@ -211,33 +211,38 @@ def uniformCostSearch(problem):
     util.raiseNotDefined()
     """
 
+    #importa classe fila de prioridade do arquivo util.py
     from util import PriorityQueue
-    pq = PriorityQueue()
-    
+
+    #carrega o estado inicial
     start = problem.getStartState()
-    
-    # item = (estado, caminho, custo)
-    pq.push((start, [], 0), 0)
-    
-    cost_so_far = {}
+    #inicia a fila de prioridade
+    filaPrioridade = PriorityQueue()
+    #inicia a lista que guardará o custo dos nodos já visitados
+    visitados = {}
+    #coloca na fila de prioridade o estado inicial, o caminho vazio e o custo vazio, e o custo vazio para a prioridade
+    filaPrioridade.push((start, [], 0), 0)
 
-    while not pq.isEmpty():
-        state, path, cost = pq.pop()
-
-        # evita expandir caminhos piores
-        if state in cost_so_far and cost > cost_so_far[state]:
+    #enquanto a fila de prioridade nao está vazia
+    while not filaPrioridade.isEmpty():
+        #tira o estado, caminho e custo de cima da fila de prioridade
+        atual, path, custoAtual = filaPrioridade.pop()
+        #se já vimos esse estado com custo menor que o atual, ignorar
+        if atual in visitados and visitados[atual] <= custoAtual:
             continue
-
-        cost_so_far[state] = cost
-
-        if problem.isGoalState(state):
+        #caso não vimos um custo menor para chegar nesse estado, definir que esse é o custo menor para chegar nesse estado
+        visitados[atual] = custoAtual
+        #se é o estado final, retorna o caminho
+        if problem.isGoalState(atual):
             return path
-
-        for successor, action, stepCost in problem.getSuccessors(state):
-            new_cost = cost + stepCost
-            pq.push((successor, path + [action], new_cost), new_cost)
-
-    return []
+        #para todos os sucessores do estado atual, 
+        for estado, ação, custo in problem.getSuccessors(atual):
+            #define o novo custo como a soma do custo do sucessor mais o custo atual
+            novoCusto = custo + custoAtual
+            # coloca ele na fila de prioridade, introduz a ação para chegar nele no caminho e adiciona com o novo custo na fila de prioridade
+            filaPrioridade.push((estado, path + [ação], novoCusto), novoCusto)
+    return[]
+    util.raiseNotDefined()
 def nullHeuristic(state, problem=None):
     """
     A heuristic function estimates the cost from the current state to the nearest
