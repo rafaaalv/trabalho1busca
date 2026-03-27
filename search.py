@@ -139,69 +139,56 @@ def breadthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    #inicializa as acoes no estado inicial como.uma lista vazia
-    actions = {
-    	problem.getStartState(): []
-    }
-    #dicionario de coordenadas para facilitar a transformacao da string com a coordenada para o passo
-    s = Directions.SOUTH
-    w = Directions.WEST
-    n = Directions.NORTH
-    e = Directions.EAST
-    coo = {
-    	"North":  n,
-    	"South": s,
-    	"East": e,
-    	"West": w
-    }
-    #inicializa resultado como uma lista vazia
-    result = []
-    #confere se o estado inicial eh o objetivo
-    if problem.isGoalState(problem.getStartState()):
-    	return result
-    #inicializa fila e lista de visitados vazias
-    queue = deque()
+    #importa classe de fila do arquivo util.py
+    from util import Queue
+
+    #inicia a fila
+    queue = Queue()
+    #inicia a lista de visitados
     visited = []
-    #coloca o estado inicial como visitado
-    visited.append(problem.getStartState())
-    #inicializa o dicionario de pais com o estado inicial sem pai
+    #carrega o estado inicial
+    start = problem.getStartState()
+    #atribui ao pai do estado inicial como nulo, para facilitar a construção do caminho depois 
     parent = {
-        problem.getStartState(): (-1, -1)
+        start: (-1, -1)
     }
-    #itera sobre os sucessores do estado inicial
-    for successor in problem.getSuccessors(problem.getStartState()):
-        #coloca o sucessor na fila
-        queue.append(successor)
-        #atribui o pai do sucessor como o estado inicial
-        parent[successor[0]] = problem.getStartState()
-    #enquanto a fila nao estiver vazia
-    while queue:
-        #tira o ultimo elemento da fila
-        state = queue.popleft()
-        #descobre o pai do estado(quem colocou ele na fila)
+    #marca o estado inicial como visitado
+    visited.append(start)
+    #inicializa as acoes no estado inicial como uma lista vazia
+    actions = {
+    	start: []
+    }
+
+    #itera sobre os sucessores do estado inicial, colocando eles na fila e atribuindo o pai deles como o estado inicial
+    for successor in problem.getSuccessors(start):
+        queue.push(successor)
+        visited.append(successor[0])    
+        parent[successor[0]] = start
+        actions[successor[0]] = actions[start].copy()
+        actions[successor[0]].append(successor[1])
+
+    #enquanto a fila nao está vazia
+    while not queue.isEmpty():
+        #tira o estado do fim da fila
+        state = queue.pop()
+        #encontra o pai do estado(quem colocou ele na fila)
         father = parent[state[0]]
-        #se o estado atual for o objetivo
+        #se é o estado final, retorna o caminho e sai da função
         if problem.isGoalState(state[0]):
-            #resultado eh igual aos passos para chegar ao pai + a acao necessaria para chegar no estado atual
-            result = actions[father].copy()
-            result.append(coo[state[1]])
-            break
-        else:
-            #se nao for o estado objetivo adiciona na lista de acoes, as acoes necessarias para chegar no estado atual
-            actions[state[0]] = actions[father].copy()
-            actions[state[0]].append(coo[state[1]])
-            #marca o estsdo atual como visitado
-            visited.append(state[0])
-            #itera por seus sucessores
-            for successor in problem.getSuccessors(state[0]):
-                #se o sucessor nao tiver sido visitado
-                if not successor[0] in visited:
-                    #adicona o sucessor na fila
-                    queue.append(successor)
-                    #atribui o pai do sucessor como o estado atual
-                    parent[successor[0]] = state[0]
-    #caso nao encontre o estado objetivo retorna a lista vazia
-    return result
+            return actions[father] + [state[1]]
+        #para todos os sucessores do estado atual, 
+        for successor in problem.getSuccessors(state[0]):
+            #se o estado do sucessor não está na lista de visitados
+            if not successor[0] in visited:
+                #marca o estado do sucessor como visitado
+                visited.append(successor[0])
+                # coloca ele na fila e introduz a ação para chegar nele no caminho
+                queue.push(successor)
+                actions[successor[0]] = actions[state[0]].copy()
+                actions[successor[0]].append(successor[1])
+                #atribui o pai do sucessor como o estado atual
+                parent[successor[0]] = state[0]
+    return []
     util.raiseNotDefined()
     
 def uniformCostSearch(problem):
@@ -248,74 +235,67 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+    start = problem.getStartState()
     #inicializa as acoes no estado inicial como uma lista vazia
     actions = {
-    	problem.getStartState(): []
+    	start: []
     }
-    #dicionario de coordenadas para facilitar a transformacao da string com a coordenada para o passo
-    s = Directions.SOUTH
-    w = Directions.WEST
-    n = Directions.NORTH
-    e = Directions.EAST
-    coo = {
-    	"North":  n,
-    	"South": s,
-    	"East": e,
-    	"West": w
+    cost = {
+    	start: 0
     }
-    #inicializa resultado como uma lista vazia
-    result = []
     #confere se o estado inicial eh o objetivo
-    if problem.isGoalState(problem.getStartState()):
-    	return result
+    if problem.isGoalState(start):
+    	return []
     #inicializa fila de prioridade e lista de visitados vazias
     queue = []
     visited = []
     #coloca o estado inicial como visitado
-    visited.append(problem.getStartState())
+    visited.append(start)
     #inicializa o dicionario de pais com o estado inicial sem pai
     parent = {
-        problem.getStartState(): (-1, -1)
+        start: (-1, -1)
     }
     #itera sobre os sucessores do estado inicial
-    successores = problem.getSuccessors(problem.getStartState())
+    successores = problem.getSuccessors(start)
     for successor in successores:
-        #coloca o sucessores na lista e prioridade sendo o segundo argumento do heap a soma da heuristica com o custo
-        heapq.heappush(queue, (successor, successor[2] + heuristic(successor[0], problem)))
+        #atualiza o custo de g (custo acumulado) para o sucessor
+        cost[successor[0]] = successor[2]
+        #empurra no heap pelo valor f = g + h
+        f = cost[successor[0]] + heuristic(successor[0], problem)
+        heapq.heappush(queue, (f, successor))
         #atribui o pai do sucessor como o estado inicial
-        parent[successor[0]] = problem.getStartState()
+        parent[successor[0]] = start
+        actions[successor[0]] = actions[start].copy()
+        actions[successor[0]].append(successor[1])
+        #marca o estado atual como visitado
+        visited.append(successor[0])
     #enquanto a fila de prioridade nao estiver vazia
     while queue:
-        #tira o primeiro elemento da fila
-        stateDist = heapq.heappop(queue)
-        #pega apenas a tripla do elemento retirado, sem o custo + heuristica
-        state = stateDist[0]
-        #descobre o pai do estado(quem colocou ele na fila)
-        father = parent[state[0]]
+        #tira o primeiro elemento da fila (menor f)
+        f, state = heapq.heappop(queue)
         #se o estado atual for o objetivo
         if problem.isGoalState(state[0]):
-            #resultado eh igual aos passos para chegar ao pai + a acao necessaria para chegar no estado atual
-            result = actions[father].copy()
-            result.append(coo[state[1]])
-            break
+            return actions[state[0]]
         else:
-            #se nao for o estado objetivo adiciona na lista de acoes, as acoes necessarias para chegar no estado atual
-            actions[state[0]] = actions[father].copy()
-            actions[state[0]].append(coo[state[1]])
-            #marca o estado atual como visitado
-            visited.append(state[0])
             #itera por seus sucessores
-            successores = problem.getSuccessors(state[0])
-            for successor in successores:
-                #se o sucessor nao tiver sido visitado
-                if not successor[0] in visited:
-                    #adiciona ele na fila de prioridade sendo o segundo argumento do heap a heuristica + o custo
-                    heapq.heappush(queue, (successor, successor[2] + heuristic(successor[0], problem)))
-                    #atribui o pai do sucessor como o estado atual
+            successors = problem.getSuccessors(state[0])
+            for successor in successors:
+                #custo acumulado do caminho atual ou um custo alto se não visitado antes
+                newCost = cost[state[0]] + successor[2]
+                #se o sucessor ainda não foi visitado, ou houve caminho mais barato
+                if successor[0] not in visited or newCost < cost[successor[0]]:
+                    cost[successor[0]] = newCost
+                    f = newCost + heuristic(successor[0], problem)
+                    heapq.heappush(queue, (f, successor))
                     parent[successor[0]] = state[0]
+                    actions[successor[0]] = actions[state[0]].copy()
+                    actions[successor[0]].append(successor[1])
+                    if successor[0] not in visited:
+                        visited.append(successor[0])
     #caso nao encontre o estado objetivo retorna a lista vazia
-    return result
+    return []
     util.raiseNotDefined()
+
 
 # Abbreviations
 bfs = breadthFirstSearch
