@@ -175,6 +175,7 @@ def breadthFirstSearch(problem):
         father = parent[state[0]]
         #se é o estado final, retorna o caminho e sai da função
         if problem.isGoalState(state[0]):
+            print(actions[father] + [state[1]])
             return actions[father] + [state[1]]
         #para todos os sucessores do estado atual, 
         for successor in problem.getSuccessors(state[0]):

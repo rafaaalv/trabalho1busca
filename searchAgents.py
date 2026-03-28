@@ -288,6 +288,7 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        self.costFn = lambda x: 1 
 
     def getStartState(self):
         """
@@ -295,7 +296,7 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        return self.startingPosition
+        return (self.startingPosition, frozenset())
         util.raiseNotDefined()
 
     def isGoalState(self, state):
@@ -303,9 +304,11 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        if self.getStartState() == state:
+        position, visited = state
+        if len(visited) == 4:
             return True
-
+        else:
+            return False 
         util.raiseNotDefined()
 
     def getSuccessors(self, state):
@@ -320,6 +323,8 @@ class CornersProblem(search.SearchProblem):
         """
 
         successors = []
+        position, visited = state
+        x,y = position
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
             # Here's a code snippet for figuring out whether a new position hits a wall:
@@ -328,13 +333,16 @@ class CornersProblem(search.SearchProblem):
             #   nextx, nexty = int(x + dx), int(y + dy)
             #   hitsWall = self.walls[nextx][nexty]
             "*** YOUR CODE HERE ***"
-            x,y = currentPosition
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
             hitsWall = self.walls[nextx][nexty]
-            if not self.walls[nextx][nexty]:
+            if not hitsWall:
                 nextState = (nextx, nexty)
-                cost = self.costFn(nextState)
+                newVisited = visited
+                if nextState in self.corners:
+                    newVisited = visited | frozenset([nextState])
+                nextState = (nextState, newVisited)
+                cost = 1
                 successors.append( ( nextState, action, cost) )
             
 
