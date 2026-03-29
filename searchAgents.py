@@ -493,7 +493,14 @@ def foodHeuristic(state, problem):
     distancias = []
     for (x, y) in foodGrid:
         distancias.append(abs(position[0] - x) + abs(position[1] - y))
-    return max(distancias)
+    comida_mais_proxima = min(distancias)
+    maior_distancia_entre_comidas = 0
+    for comida1 in foodGrid:
+        for comida2 in foodGrid:
+            d = abs(comida1[0] - comida2[0]) + (comida1[1] - comida2[1])
+            if d > maior_distancia_entre_comidas:
+                maior_distancia_entre_comidas = d
+    return comida_mais_proxima + maior_distancia_entre_comidas
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
