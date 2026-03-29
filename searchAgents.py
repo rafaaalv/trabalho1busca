@@ -524,6 +524,8 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
+        from search import breadthFirstSearch
+        return breadthFirstSearch(problem)
         util.raiseNotDefined()
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -558,6 +560,11 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         complete the problem definition.
         """
         x,y = state
+        #se tem comida no estado atual, retorna que é o estado de objetivo, senão, retorna falso
+        if self.food[x][y]:
+            return True
+        else:
+            return False
 
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
