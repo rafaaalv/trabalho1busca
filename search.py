@@ -175,7 +175,6 @@ def breadthFirstSearch(problem):
         father = parent[state[0]]
         #se é o estado final, retorna o caminho e sai da função
         if problem.isGoalState(state[0]):
-            print(actions[father] + [state[1]])
             return actions[father] + [state[1]]
         #para todos os sucessores do estado atual, 
         for successor in problem.getSuccessors(state[0]):
@@ -183,7 +182,7 @@ def breadthFirstSearch(problem):
             if not successor[0] in visited:
                 #marca o estado do sucessor como visitado
                 visited.append(successor[0])
-                # coloca ele na fila e introduz a ação para chegar nele no caminho
+                # coloca ele na fila e atribui sua acao a acao do estado atual mais a coordenada para chegar no sucessor
                 queue.push(successor)
                 actions[successor[0]] = actions[state[0]].copy()
                 actions[successor[0]].append(successor[1])
@@ -241,18 +240,19 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+
+    #importa a fila de prioridade do arquivo util.py
     from util import PriorityQueue
+    #carrega o estado inicial
     start = problem.getStartState()
     #inicializa as acoes no estado inicial como uma lista vazia
     actions = {
     	start: []
     }
+    #inicializa o custo de cada estado com o estado inicial em zero
     cost = {
     	start: 0
     }
-    #confere se o estado inicial eh o objetivo
-    if problem.isGoalState(start):
-    	return []
     #inicializa fila de prioridade e lista de visitados vazias
     queue = PriorityQueue()
     visited = []
@@ -263,13 +263,14 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     #itera sobre os sucessores do estado inicial
     successores = problem.getSuccessors(start)
     for successor in successores:
-        #atualiza o custo de g (custo acumulado) para o sucessor
+        #atualiza o custo de g(custo acumulado) para o sucessor
         cost[successor[0]] = successor[2]
-        #empurra no heap pelo valor f = g + h
+        #coloca no heap pelo valor f = g + h
         f = cost[successor[0]] + heuristic(successor[0], problem)
         queue.push(successor, f)
         #atribui o pai do sucessor como o estado inicial
         parent[successor[0]] = start
+        #coloca as acoes necessarias para chegar no sucessor
         actions[successor[0]] = actions[start].copy()
         actions[successor[0]].append(successor[1])
     #enquanto a fila de prioridade nao estiver vazia
@@ -277,11 +278,11 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         #tira o primeiro elemento da fila (menor f)
         state = queue.pop()
         #caso não tenha sido visitado, marca como visitado, mas se já foi visitado, não visita novamente
-        if state[0] in visited:
-            continue
-        visited.append(state[0])
+        if not state[0] in visited:
+            visited.append(state[0])
         #se o estado atual for o objetivo
         if problem.isGoalState(state[0]):
+            #retorna as acoes necessarias para chegar nele
             return actions[state[0]]
         else:
             #itera por seus sucessores
@@ -290,11 +291,16 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                 #custo acumulado do caminho atual ou um custo alto se não visitado antes
                 newCost = cost[state[0]] + successor[2]
                 #se o sucessor ainda não foi visitado, ou houve caminho mais barato
-                if successor[0] not in cost or newCost < cost[successor[0]]:
+                if successor[0] not in visited or newCost < cost[successor[0]]:
+                    #o custo para chegar no sucessor eh o novo custo
                     cost[successor[0]] = newCost
+                    #f = g + h
                     f = newCost + heuristic(successor[0], problem)
+                    #coloca o sucessor na fila de prioridade
                     queue.push(successor, f)
+                    #atribui o pai do sucessor ao estado atual
                     parent[successor[0]] = state[0]
+                    #coloca as acoes necessarias para chegar no sucessor
                     actions[successor[0]] = actions[state[0]].copy()
                     actions[successor[0]].append(successor[1])
     #caso nao encontre o estado objetivo retorna a lista vazia
