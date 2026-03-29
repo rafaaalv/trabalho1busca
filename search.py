@@ -241,6 +241,7 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+    from util import PriorityQueue
     start = problem.getStartState()
     #inicializa as acoes no estado inicial como uma lista vazia
     actions = {
@@ -253,7 +254,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     if problem.isGoalState(start):
     	return []
     #inicializa fila de prioridade e lista de visitados vazias
-    queue = []
+    queue = PriorityQueue()
     visited = []
     #coloca o estado inicial como visitado
     visited.append(start)
@@ -268,7 +269,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         cost[successor[0]] = successor[2]
         #empurra no heap pelo valor f = g + h
         f = cost[successor[0]] + heuristic(successor[0], problem)
-        heapq.heappush(queue, (f, successor))
+        queue.push(successor, f)
         #atribui o pai do sucessor como o estado inicial
         parent[successor[0]] = start
         actions[successor[0]] = actions[start].copy()
@@ -276,9 +277,9 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         #marca o estado atual como visitado
         visited.append(successor[0])
     #enquanto a fila de prioridade nao estiver vazia
-    while queue:
+    while not queue.isEmpty():
         #tira o primeiro elemento da fila (menor f)
-        f, state = heapq.heappop(queue)
+        state = queue.pop()
         #se o estado atual for o objetivo
         if problem.isGoalState(state[0]):
             return actions[state[0]]
@@ -292,7 +293,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                 if successor[0] not in visited or newCost < cost[successor[0]]:
                     cost[successor[0]] = newCost
                     f = newCost + heuristic(successor[0], problem)
-                    heapq.heappush(queue, (f, successor))
+                    queue.push(successor, f)
                     parent[successor[0]] = state[0]
                     actions[successor[0]] = actions[state[0]].copy()
                     actions[successor[0]].append(successor[1])
