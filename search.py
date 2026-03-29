@@ -256,8 +256,6 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     #inicializa fila de prioridade e lista de visitados vazias
     queue = PriorityQueue()
     visited = []
-    #coloca o estado inicial como visitado
-    visited.append(start)
     #inicializa o dicionario de pais com o estado inicial sem pai
     parent = {
         start: (-1, -1)
@@ -274,12 +272,14 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         parent[successor[0]] = start
         actions[successor[0]] = actions[start].copy()
         actions[successor[0]].append(successor[1])
-        #marca o estado atual como visitado
-        visited.append(successor[0])
     #enquanto a fila de prioridade nao estiver vazia
     while not queue.isEmpty():
         #tira o primeiro elemento da fila (menor f)
         state = queue.pop()
+        #caso não tenha sido visitado, marca como visitado, mas se já foi visitado, não visita novamente
+        if state[0] in visited:
+            continue
+        visited.append(state[0])
         #se o estado atual for o objetivo
         if problem.isGoalState(state[0]):
             return actions[state[0]]
@@ -290,15 +290,13 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                 #custo acumulado do caminho atual ou um custo alto se não visitado antes
                 newCost = cost[state[0]] + successor[2]
                 #se o sucessor ainda não foi visitado, ou houve caminho mais barato
-                if successor[0] not in visited or newCost < cost[successor[0]]:
+                if successor[0] not in cost or newCost < cost[successor[0]]:
                     cost[successor[0]] = newCost
                     f = newCost + heuristic(successor[0], problem)
                     queue.push(successor, f)
                     parent[successor[0]] = state[0]
                     actions[successor[0]] = actions[state[0]].copy()
                     actions[successor[0]].append(successor[1])
-                    if successor[0] not in visited:
-                        visited.append(successor[0])
     #caso nao encontre o estado objetivo retorna a lista vazia
     return []
     util.raiseNotDefined()

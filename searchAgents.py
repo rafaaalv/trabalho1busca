@@ -485,6 +485,7 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
+    
     "*** YOUR CODE HERE ***"
     return 0
 
